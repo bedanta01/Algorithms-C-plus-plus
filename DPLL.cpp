@@ -35,6 +35,7 @@ bool dpll(vector< vector<int> > clauses,map<int,bool> assigned){
     vector< vector<int> > :: iterator i;
     vector<int>:: iterator j;
 
+
     cout<<"clause"<<endl;
     for(i=clauses.begin();i<clauses.end();i++){
 
@@ -52,9 +53,6 @@ bool dpll(vector< vector<int> > clauses,map<int,bool> assigned){
 
 
     auto remove_true_clause = [&](vector<int>i)->bool{
-        if(i.size()==1){
-            return true;
-        }
         vector<int>:: iterator it;
         bool is_true = false;
         for(it=i.begin();it!=i.end();it++){
@@ -79,35 +77,52 @@ bool dpll(vector< vector<int> > clauses,map<int,bool> assigned){
     //auto remove_true_clause = [&]()
 
     //unit propagation
+    for(i=clauses.begin();i<clauses.end();i++){
+        auto iterator = remove_if(i->begin(),i->end(),remove_false_literal);
+        i->erase(iterator,i->end());
+    }
 
+    auto iterator = remove_if(clauses.begin(),clauses.end(),remove_true_clause);
+    clauses.erase(iterator,clauses.end());
+
+    vector<vector<int> > clause_copy;
+
+    //unit propagation
+    int temp = 0;
     for(i=clauses.begin();i!=clauses.end();i++){
         if(i->size()==1){
+            clause_copy = clauses;
             j = i->begin();
             if(*j<0){
-                int index = -1*(*j);
-                sol[index] = false;
-                assigned[index] = false;
+                //int index = -1*(*j);
+                sol[abs(*j)] = false;
+                assigned[abs(*j)] = false;
             }
             else{
                 int index = *j;
                 sol[index] = true;
                 assigned[index] = true;
             }
+            clause_copy.erase(clause_copy.begin()+temp);
+            return dpll(clause_copy,assigned);
 
         }
+        temp++;
+
+
     }
 
-    for(i=clauses.begin();i<clauses.end();i++){
+    /*for(i=clauses.begin();i<clauses.end();i++){
         auto iterator = remove_if(i->begin(),i->end(),remove_false_literal);
         i->erase(iterator,i->end());
     }
     //remove unit and true clause
     auto iterator = remove_if(clauses.begin(),clauses.end(),remove_true_clause);
-    clauses.erase(iterator,clauses.end());
+    clauses.erase(iterator,clauses.end());*/
 
 
-    sort(clauses.begin(),clauses.end(),sort_clause);
-    vector<vector<int> > clause_copy = clauses;
+    sort(clause_copy.begin(),clause_copy.end(),sort_clause);
+    clause_copy = clauses;
     for(i=clause_copy.begin();i<clause_copy.end();i++){
             for(j=i->begin();j!=i->end();j++){
 
@@ -129,7 +144,7 @@ bool dpll(vector< vector<int> > clauses,map<int,bool> assigned){
     }
 
 
-return true;
+return false;
 
 
 }
